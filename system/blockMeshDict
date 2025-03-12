@@ -1,0 +1,103 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2406                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+scale   1;
+
+// Domain dimensions
+// The Crazyflie drone is very small (approx. 9.2 cm motor-to-motor)
+// Create a smaller domain more appropriate for the drone size
+xmin    -0.15;
+xmax     0.15;
+ymin    -0.15;
+ymax     0.15;
+zmin    -0.15;
+zmax     0.15;
+
+// Base mesh resolution - further reduced to avoid memory issues
+nx      40;
+ny      40;
+nz      40;
+
+// Grading to concentrate cells in the center where the drone is
+xGrading 2;  // From edges toward center
+yGrading 2;  // From edges toward center
+zGrading 2;  // Consistent grading in all directions
+
+vertices
+(
+    ($xmin $ymin $zmin)  // 0
+    ($xmax $ymin $zmin)  // 1
+    ($xmax $ymax $zmin)  // 2
+    ($xmin $ymax $zmin)  // 3
+    ($xmin $ymin $zmax)  // 4
+    ($xmax $ymin $zmax)  // 5
+    ($xmax $ymax $zmax)  // 6
+    ($xmin $ymax $zmax)  // 7
+);
+
+blocks
+(
+    hex (0 1 2 3 4 5 6 7) ($nx $ny $nz) simpleGrading (
+        // X-direction: concentrate cells near center
+        (
+            (0.5 0.5 $xGrading)  // First half with grading toward center
+            (0.5 0.5 0.5)        // Second half with grading toward center (1/xGrading)
+        )
+        // Y-direction: concentrate cells near center
+        (
+            (0.5 0.5 $yGrading)  // First half with grading toward center
+            (0.5 0.5 0.5)        // Second half with grading toward center (1/yGrading)
+        )
+        // Z-direction: slight concentration toward center
+        (
+            (0.5 0.5 $zGrading)  // First half with grading toward center
+            (0.5 0.5 0.5)        // Second half with grading toward center (1/zGrading)
+        )
+    )
+);
+
+boundary
+(
+    inlet
+    {
+        type patch;
+        faces
+        (
+            (0 4 7 3)  // -x face (inlet)
+        );
+    }
+    outlet
+    {
+        type patch;
+        faces
+        (
+            (1 5 6 2)  // +x face (outlet)
+        );
+    }
+    sides
+    {
+        type patch;
+        faces
+        (
+            (0 1 5 4)  // -y face
+            (3 7 6 2)  // +y face
+            (0 3 2 1)  // -z face
+            (4 5 6 7)  // +z face
+        );
+    }
+);
+
+// ************************************************************************* // 

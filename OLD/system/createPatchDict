@@ -1,0 +1,142 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1912                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      createPatchDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+pointSync false;
+
+// Patches to create.
+patches
+(
+    // Rotating regioncw1 patch
+    {
+        //- Master side patch
+        name            AMI11;
+        patchInfo
+        {
+            type            cyclicAMI;
+            matchTolerance  0.001;
+            neighbourPatch  AMI12;
+            transform       noOrdering;
+        }
+        constructFrom patches;
+        patches (AMI1);
+    }
+
+    {
+        //- Slave side patch
+        name            AMI12;
+        patchInfo
+        {
+            type            cyclicAMI;
+            matchTolerance  0.001;
+            neighbourPatch  AMI11;
+            transform       noOrdering;
+        }
+        constructFrom patches;
+        patches (AMI1_slave);
+    }
+
+
+
+    // Rotating regioncw2 patch
+    {
+        //- Master side patch
+        name            AMI21;
+        patchInfo
+        {
+            type            cyclicAMI;
+            matchTolerance  0.001;
+            neighbourPatch  AMI22;
+            transform       noOrdering;
+        }
+        constructFrom patches;
+        patches (AMI2);
+    }
+
+    {
+        //- Slave side patch
+        name            AMI22;
+        patchInfo
+        {
+            type            cyclicAMI;
+            matchTolerance  0.001;
+            neighbourPatch  AMI21;
+            transform       noOrdering;
+        }
+        constructFrom patches;
+        patches (AMI2_slave);
+    }
+
+
+
+    // Rotating regionccw1 patch
+    {
+        //- Master side patch
+        name            AMI31;
+        patchInfo
+        {
+            type            cyclicAMI;
+            matchTolerance  0.001;
+            neighbourPatch  AMI32;
+            transform       noOrdering;
+        }
+        constructFrom patches;
+        patches (AMI3);
+    }
+    {
+        //- Slave side patch
+        name            AMI32;
+        patchInfo
+        {
+            type            cyclicAMI;
+            matchTolerance  0.001;
+            neighbourPatch  AMI31;
+            transform       noOrdering;
+        }
+        constructFrom patches;
+        patches (AMI3_slave);
+    }
+
+
+    // Rotating regionccw2 patch
+    {
+        //- Master side patch
+        name            AMI41;
+        patchInfo
+        {
+            type            cyclicAMI;
+            matchTolerance  0.001;
+            neighbourPatch  AMI42;
+            transform       noOrdering;
+        }
+        constructFrom patches;
+        patches (AMI4);
+    }
+    {
+        //- Slave side patch
+        name            AMI42;
+        patchInfo
+        {
+            type            cyclicAMI;
+            matchTolerance  0.001;
+            neighbourPatch  AMI41;
+            transform       noOrdering;
+        }
+        constructFrom patches;
+        patches (AMI4_slave);
+    }
+
+);
+// ************************************************************************* //

@@ -1,0 +1,66 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1912                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      surfaceFeatureExtractDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
+// Propellers
+propellerccw1.stl
+{
+    extractionMethod    extractFromSurface;
+    includedAngle       150;
+}
+propellercw1.stl
+{
+    extractionMethod    extractFromSurface;
+    includedAngle       150;
+}
+propellercw2.stl
+{
+    extractionMethod    extractFromSurface;
+    includedAngle       150;
+}
+propellerccw2.stl
+{
+    extractionMethod    extractFromSurface;
+    includedAngle       150;
+}
+
+//Rotating zones
+AMI1.stl
+{
+    extractionMethod    extractFromSurface;
+    includedAngle       150;
+}
+AMI2.stl
+{
+    extractionMethod    extractFromSurface;
+    includedAngle       150;
+}
+AMI3.stl
+{
+    extractionMethod    extractFromSurface;
+    includedAngle       150;
+}
+AMI4.stl
+{
+    extractionMethod    extractFromSurface;
+    includedAngle       150;
+}
+
+
+
+
+// ************************************************************************* //

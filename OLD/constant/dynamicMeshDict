@@ -1,0 +1,88 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  5                                     |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      dynamicMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+dynamicFvMesh   dynamicMultiMotionSolverFvMesh;
+
+motionSolverLibs ("libfvMotionSolvers.so");
+
+dynamicMultiMotionSolverFvMeshCoeffs
+{
+    AMI1 //propellercw1
+    {
+        solver solidBody;
+        cellZone rotatingZone1;
+        solidBodyCoeffs
+        {
+            solidBodyMotionFunction  rotatingMotion;
+            rotatingMotionCoeffs
+            {
+                origin      (-0.031609 0.031739 -0.006721);
+                axis        (0 0 1);
+                omega       -2000; 
+            }
+        }
+    }
+
+    AMI2 //propellercw2
+    {
+        solver solidBody;
+        cellZone rotatingZone2;
+        solidBodyCoeffs
+        {
+            solidBodyMotionFunction  rotatingMotion;
+            rotatingMotionCoeffs
+            {
+                origin      (0.031674 -0.031545 -0.006436);
+                axis        (0 0 1);
+                omega       -2000; 
+            }
+        }
+    } 
+    
+    AMI3  //propellerccw1
+    {
+        solver solidBody;
+        cellZone rotatingZone3;
+        solidBodyCoeffs
+        {
+            solidBodyMotionFunction  rotatingMotion;
+            rotatingMotionCoeffs
+            {
+                origin      (0.031692 0.031757 -0.006429);
+                axis        (0 0 1);
+                omega       2000; 
+            }
+        }
+    }
+
+    AMI4 //propellerccw2
+    {
+        solver solidBody;
+        cellZone rotatingZone4;
+        solidBodyCoeffs
+        {
+            solidBodyMotionFunction  rotatingMotion;
+            rotatingMotionCoeffs
+            {
+                origin      (-0.031609 -0.031545 -0.00672);
+                axis        (0 0 1);
+                omega       2000; 
+            }
+        }
+    }  
+}
+
+// ************************************************************************* //

@@ -1,0 +1,72 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2406                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      MRFProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Crazyflie rotors rotate at approximately 20,000 RPM at full throttle
+// We'll use a more moderate speed of 15,000 RPM = 1570 rad/s for stability
+
+MRF1
+{
+    cellZone        rotor1Zone;
+    active          yes;
+
+    // Fixed patches (by default they 'move' with the MRF zone)
+    nonRotatingPatches ();
+
+    origin          (0.05 0.05 0);
+    axis            (0 0 1);
+    omega           1570;  // rad/s, positive = counter-clockwise
+}
+
+MRF2
+{
+    cellZone        rotor2Zone;
+    active          yes;
+
+    // Fixed patches (by default they 'move' with the MRF zone)
+    nonRotatingPatches ();
+
+    origin          (-0.05 0.05 0);
+    axis            (0 0 1);
+    omega           -1570;  // rad/s, negative = clockwise
+}
+
+MRF3
+{
+    cellZone        rotor3Zone;
+    active          yes;
+
+    // Fixed patches (by default they 'move' with the MRF zone)
+    nonRotatingPatches ();
+
+    origin          (-0.05 -0.05 0);
+    axis            (0 0 1);
+    omega           1570;  // rad/s, positive = counter-clockwise
+}
+
+MRF4
+{
+    cellZone        rotor4Zone;
+    active          yes;
+
+    // Fixed patches (by default they 'move' with the MRF zone)
+    nonRotatingPatches ();
+
+    origin          (0.05 -0.05 0);
+    axis            (0 0 1);
+    omega           -1570;  // rad/s, negative = clockwise
+}
+
+// ************************************************************************* // 

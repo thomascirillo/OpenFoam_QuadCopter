@@ -1,0 +1,26 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
+#------------------------------------------------------------------------------
+
+cleanCase0
+
+# Clean all time directories, but not 0
+find . -maxdepth 1 -type d -name "[1-9]*" -o -name "0.[0-9]*" | xargs rm -rf
+
+# Clean logs and mesh files
+rm -f log.* > /dev/null 2>&1
+rm -rf constant/polyMesh/
+rm -rf constant/extendedFeatureEdgeMesh/
+rm -rf processor*
+rm -rf postProcessing
+
+# Clean out triSurface directory except STL files
+find constant/triSurface -name "*.eMesh" -delete
+find constant/triSurface -name "*.obj" -delete
+find constant/triSurface -name "*.vtk" -delete
+
+# Clean any .foam files
+rm -f *.foam
+
+#------------------------------------------------------------------------------ 

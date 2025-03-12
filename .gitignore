@@ -1,0 +1,25 @@
+# Ignore simulation results directories
+[0-9]*/
+[0-9].[0-9]*/
+processor*/
+
+# Ignore large log files
+*.log
+log.*
+
+# Ignore ParaView files
+*.foam
+*.OpenFOAM
+
+# Ignore mesh files
+constant/polyMesh/*
+!constant/polyMesh/boundary
+
+# Keep STL files
+!constant/triSurface/*.stl
+
+# Ignore postProcessing data
+postProcessing/
+
+# macOS system files
+.DS_Store 

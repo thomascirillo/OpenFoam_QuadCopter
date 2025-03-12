@@ -1,0 +1,116 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2406                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      topoSetDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+actions
+(
+    // Rotor 1 zone (front right)
+    {
+        name    rotor1Zone;
+        type    cellSet;
+        action  new;
+        source  cylinderToCell;
+        sourceInfo
+        {
+            p1      (0.02 0.02 -0.01);   // Bottom center - scaled down
+            p2      (0.02 0.02 0.01);    // Top center - scaled down
+            radius  0.01;                // Radius matching refinement region
+        }
+    }
+    {
+        name    rotor1Zone;
+        type    cellZoneSet;
+        action  new;
+        source  setToCellZone;
+        sourceInfo
+        {
+            set rotor1Zone;
+        }
+    }
+
+    // Rotor 2 zone (front left)
+    {
+        name    rotor2Zone;
+        type    cellSet;
+        action  new;
+        source  cylinderToCell;
+        sourceInfo
+        {
+            p1      (-0.02 0.02 -0.01);
+            p2      (-0.02 0.02 0.01);
+            radius  0.01;
+        }
+    }
+    {
+        name    rotor2Zone;
+        type    cellZoneSet;
+        action  new;
+        source  setToCellZone;
+        sourceInfo
+        {
+            set rotor2Zone;
+        }
+    }
+
+    // Rotor 3 zone (rear left)
+    {
+        name    rotor3Zone;
+        type    cellSet;
+        action  new;
+        source  cylinderToCell;
+        sourceInfo
+        {
+            p1      (-0.02 -0.02 -0.01);
+            p2      (-0.02 -0.02 0.01);
+            radius  0.01;
+        }
+    }
+    {
+        name    rotor3Zone;
+        type    cellZoneSet;
+        action  new;
+        source  setToCellZone;
+        sourceInfo
+        {
+            set rotor3Zone;
+        }
+    }
+
+    // Rotor 4 zone (rear right)
+    {
+        name    rotor4Zone;
+        type    cellSet;
+        action  new;
+        source  cylinderToCell;
+        sourceInfo
+        {
+            p1      (0.02 -0.02 -0.01);
+            p2      (0.02 -0.02 0.01);
+            radius  0.01;
+        }
+    }
+    {
+        name    rotor4Zone;
+        type    cellZoneSet;
+        action  new;
+        source  setToCellZone;
+        sourceInfo
+        {
+            set rotor4Zone;
+        }
+    }
+);
+
+// ************************************************************************* // 

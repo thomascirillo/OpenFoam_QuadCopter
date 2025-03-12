@@ -1,0 +1,102 @@
+#!/bin/bash
+cd "${0%/*}" || exit                                # Run from this directory
+
+# Color definitions
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+YELLOW='\033[0;33m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+# Progress indicator function
+show_progress() {
+    local message=$1
+    local step=$2
+    local total=$3
+    local percent=$((step * 100 / total))
+    local completed=$((percent / 2))
+    local remaining=$((50 - completed))
+    
+    printf "\r${BLUE}[${GREEN}"
+    printf "%0.s#" $(seq 1 $completed)
+    printf "%0.s " $(seq 1 $remaining)
+    printf "${BLUE}] ${YELLOW}%3d%%${NC} - %s" $percent "$message"
+}
+
+# Execute command with progress indicator
+run_with_progress() {
+    local app=$1
+    local msg=$2
+    local step=$3
+    local total=$4
+    
+    echo -e "\n${BLUE}════════════════════════════════════════════════════════════════════${NC}"
+    show_progress "$msg" $step $total
+    echo -e "\n${BLUE}> Running: ${YELLOW}$app${NC}"
+    
+    # Run the application and capture logs
+    eval "$app" > log.$app 2>&1
+    
+    local status=$?
+    if [ $status -eq 0 ]; then
+        echo -e "${GREEN}✓ Completed successfully${NC}"
+    else
+        echo -e "${RED}✗ Failed with exit code $status${NC}"
+        echo -e "${RED}Check log.$app for details${NC}"
+        exit 1
+    fi
+}
+
+# Source OpenFOAM environment if not already sourced
+if [ -z "$WM_PROJECT" ]; then
+    echo "Sourcing OpenFOAM environment..."
+    
+    # Try different possible paths for OpenFOAM
+    if [ -f "$HOME/OpenFOAM/OpenFOAM-v2406/etc/bashrc" ]; then
+        source "$HOME/OpenFOAM/OpenFOAM-v2406/etc/bashrc"
+    elif [ -f "/opt/openfoam2406/etc/bashrc" ]; then
+        source "/opt/openfoam2406/etc/bashrc"
+    elif [ -f "/usr/lib/openfoam/openfoam2406/etc/bashrc" ]; then
+        source "/usr/lib/openfoam/openfoam2406/etc/bashrc"
+    else
+        echo "Error: Could not find OpenFOAM v2406 environment."
+        echo "Please ensure OpenFOAM v2406 is installed and the path is correct."
+        exit 1
+    fi
+fi
+
+# Source tutorial run functions
+. "$WM_PROJECT_DIR/bin/tools/RunFunctions"
+
+#------------------------------------------------------------------------------
+
+# Get application name
+application=$(getApplication)
+
+echo "Starting OpenFOAM simulation..."
+
+# Clean the case
+./Allclean
+
+# Create base mesh
+runApplication blockMesh
+
+# Create initial cell zones
+runApplication topoSet
+
+# Run snappyHexMesh
+runApplication surfaceFeatureExtract
+runApplication snappyHexMesh -overwrite
+
+# Recreate cell zones after snappyHexMesh
+runApplication topoSet
+
+# Copy mesh from 0.orig
+cp -r 0.orig 0
+
+# Run solver
+runApplication $(getApplication)
+
+echo "All steps completed successfully"
+
+#------------------------------------------------------------------------------ 

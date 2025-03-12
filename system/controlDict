@@ -1,0 +1,132 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2406                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     pimpleFoam;
+
+startFrom       startTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         5.0;
+
+// Use a smaller initial deltaT for stability
+deltaT          0.00001;
+
+// Adjust deltaT based on Courant number for better stability
+adjustTimeStep  yes;
+maxCo           0.3;
+maxDeltaT       0.001;
+
+writeControl    timeStep;
+
+writeInterval   500;
+
+purgeWrite      0;
+
+writeFormat     binary;
+
+writePrecision  6;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable true;
+
+// Add function to dump cell zones for debugging
+functions
+{
+    // Write cellZones as VTK for debugging
+    cellZoneWrite
+    {
+        type            writeCellZones;
+        libs            (fieldFunctionObjects);
+        enabled         true;
+        writeControl    writeTime;
+    }
+    
+    forces
+    {
+        type            forces;
+        libs            (forces);
+        writeControl    timeStep;
+        writeInterval   10;
+        patches         (crazyflieBody rotor1 rotor2 rotor3 rotor4);
+        rho             rhoInf;
+        log             true;
+        rhoInf          1.225;
+        CofR            (0 0 0);
+    }
+
+    forceCoeffs
+    {
+        type            forceCoeffs;
+        libs            (forces);
+        writeControl    timeStep;
+        writeInterval   10;
+        patches         (crazyflieBody rotor1 rotor2 rotor3 rotor4);
+        rho             rhoInf;
+        log             true;
+        rhoInf          1.225;
+        CofR            (0 0 0);
+        liftDir         (0 0 1);
+        dragDir         (1 0 0);
+        pitchAxis       (0 1 0);
+        magUInf         10;
+        lRef            0.092;    // Characteristic length (approx. drone diameter)
+        Aref            0.0067;   // Reference area (approx. drone frontal area)
+    }
+
+    // Field averaging for visualization
+    fieldAverage
+    {
+        type            fieldAverage;
+        libs            (fieldFunctionObjects);
+        writeControl    writeTime;
+        fields
+        (
+            U
+            {
+                mean        on;
+                prime2Mean  on;
+                base        time;
+            }
+
+            p
+            {
+                mean        on;
+                prime2Mean  on;
+                base        time;
+            }
+        );
+    }
+    
+    // Add residual monitoring for debugging
+    residuals
+    {
+        type            residuals;
+        libs            (fieldFunctionObjects);
+        writeControl    timeStep;
+        writeInterval   1;
+        fields          (p U);
+    }
+}
+
+// ************************************************************************* // 

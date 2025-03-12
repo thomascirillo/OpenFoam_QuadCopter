@@ -1,0 +1,277 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1912                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      snappyHexMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+castellatedMesh true;
+snap            true;
+addLayers       true;
+
+geometry
+{
+    // Drone Support
+    propellercw1.stl { type triSurfaceMesh; name propellercw1;}
+    propellerccw1.stl { type triSurfaceMesh; name propellerccw1;}
+    propellercw2.stl { type triSurfaceMesh; name propellercw2;}
+    propellerccw2.stl { type triSurfaceMesh; name propellerccw2;}
+
+
+    // 4 Rotating regions
+    AMI1.stl { type triSurfaceMesh; name AMI1;}
+    AMI2.stl { type triSurfaceMesh; name AMI2;}
+    AMI3.stl { type triSurfaceMesh; name AMI3;}
+    AMI4.stl { type triSurfaceMesh; name AMI4;}
+
+
+
+}
+
+castellatedMeshControls
+{
+    maxLocalCells 200000000;
+    maxGlobalCells 20000000;
+    minRefinementCells 1;
+    maxLoadUnbalance 0.0001;
+    nCellsBetweenLevels 3;
+
+    features // List of features for refinement 
+    (
+        // Rotating regions
+        { file "AMI1.eMesh"; level 3;} 
+        { file "AMI2.eMesh"; level 3;} 
+        { file "AMI3.eMesh"; level 3;} 
+        { file "AMI4.eMesh"; level 3;} 
+
+
+        
+        // Drone support
+        { file "propellercw1.eMesh"; level 4;}
+        { file "propellercw2.eMesh"; level 4;}
+        { file "propellerccw1.eMesh"; level 4;}
+        { file "propellerccw2.eMesh"; level 4;}
+
+    );
+
+    refinementSurfaces // Dictionary of surfaces for refinement
+    {
+        // Dictionary of surfaces for refinement
+        AMI1
+        {
+            level (3 3); 
+            faceType boundary;
+            cellZone rotatingZone1;
+            faceZone rotatingZone1;
+            cellZoneInside inside;
+        } 
+        AMI2
+        {
+            level (3 3); 
+            faceType boundary;
+            cellZone rotatingZone2;
+            faceZone rotatingZone2;
+            cellZoneInside inside;
+        } 
+        AMI3
+        {
+            level (3 3); 
+            faceType boundary;
+            cellZone rotatingZone3;
+            faceZone rotatingZone3;
+            cellZoneInside inside;
+        } 
+        AMI4
+        {
+            level (3 3); 
+            faceType boundary;
+            cellZone rotatingZone4;
+            faceZone rotatingZone4;
+            cellZoneInside inside;
+        } 
+  
+        propellerccw2 { level (4 4);}
+        propellerccw1 { level (4 4);}
+        propellercw2 { level (4 4);}
+        propellercw1 { level (4 4);}
+    }
+    // feature angle refinement, it applies maximum level of refinement to cells that can see intersections whose angle exceeds this value. 
+    resolveFeatureAngle 30;
+
+    refinementRegions
+    {
+        AMI1 { mode inside; levels ((1E15 3)); } 
+        AMI2 { mode inside; levels ((1E15 3)); } 
+        AMI3 { mode inside; levels ((1E15 3)); } 
+        AMI4 { mode inside; levels ((1E15 3)); } 
+    }
+
+    //The locationInMesh point should never be on a face of the mesh, even after refinement. 
+    // It should always be inside a cell or the meshing will fail!
+    //  defines the part of the mesh which is not removed, the point must be placed inside a cell
+    locationInMesh (0.0 0.0 0.0); // if it is not well defined expect errors
+
+    allowFreeStandingZoneFaces false;
+}
+// Reconstructs the cells to move the edges from inside the region to the required boundary
+snapControls
+{
+    nSmoothPatch 5;// Number of patch smoothing iterations before finding correspondence to surface
+    tolerance 2; // Maximum relative distance for points to be attracted by surface.
+    // True distance is this factor times local maximum edge length.
+    // Note: changed(corrected) w.r.t 17x! (17x used 2* tolerance)
+    nSolveIter 150;// Number of mesh displacement relaxation iterations.
+    nRelaxIter 8;// Maximum number of snapping relaxation iterations. Should stop before upon reaching a correct mesh.
+    nFeatureSnapIter 10; // Number of feature edge snapping iterations. Leave out altogether to disable.
+    implicitFeatureSnap true;// Detect (geometric only) features by sampling the surface (default=false).
+    explicitFeatureSnap false; // Use castellatedMeshControls::features (default = true)
+    // Detect features between multiple surfaces
+    multiRegionFeatureSnap true;
+}
+
+addLayersControls
+{
+    // Are the thickness parameters below relative to the undistorted
+    // size of the refined cell outside layer (true) or absolute sizes (false).
+    relativeSizes true;
+
+    layers
+    {
+    }
+
+    // Expansion factor for layer mesh
+    expansionRatio 1.3;
+
+    // Wanted thickness of final added cell layer. If multiple layers
+    // is the thickness of the layer furthest away from the wall.
+    // Relative to undistorted size of cell outside layer.
+    // See relativeSizes parameter.
+    finalLayerThickness 0.3;
+
+    // Minimum thickness of cell layer. If for any reason layer
+    // cannot be above minThickness do not add layer.
+    // Relative to undistorted size of cell outside layer
+    minThickness 0.01;
+
+    // If points get not extruded do nGrow layers of connected faces that are
+    // also not grown. This helps convergence of the layer addition process
+    // close to features.
+    nGrow 0;
+
+    // Advanced settings
+
+    // When not to extrude surface. 0 is flat surface, 90 is when two faces
+    // are perpendicular
+    featureAngle 10;
+
+    // Maximum number of snapping relaxation iterations. Should stop
+    // before upon reaching a correct mesh.
+    nRelaxIter 8;
+
+    // Number of smoothing iterations of surface normals
+    nSmoothSurfaceNormals 2;
+
+    // Number of smoothing iterations of interior mesh movement direction
+    nSmoothNormals 5;
+
+    // Smooth layer thickness over surface patches
+    nSmoothThickness 10;
+
+    // Stop layer growth on highly warped cells
+    maxFaceThicknessRatio 0.5;
+
+    // Reduce layer growth where ratio thickness to medial
+    // distance is large
+    maxThicknessToMedialRatio 0.3;
+
+    // Angle used to pick up medial axis points
+    minMedialAxisAngle 90;
+
+    // Create buffer region for new layer terminations
+    nBufferCellsNoExtrude 0;
+
+    // Overall max number of layer addition iterations. The mesher will exit
+    // if it reaches this number of iterations; possibly with an illegal
+    // mesh.
+    nLayerIter 50;
+}
+
+meshQualityControls
+{
+    //- Maximum non-orthogonality allowed. Set to 180 to disable.
+    maxNonOrtho 70;
+
+    //- Max skewness allowed. Set to <0 to disable.
+    maxBoundarySkewness 20;
+    maxInternalSkewness 4;
+
+    //- Max concaveness allowed. Is angle (in degrees) below which concavity
+    //  is allowed. 0 is straight face, <0 would be convex face.
+    //  Set to 180 to disable.
+    maxConcave 80;
+
+    //- Minimum pyramid volume. Is absolute volume of cell pyramid.
+    //  Set to a sensible fraction of the smallest cell volume expected.
+    //  Set to very negative number (e.g. -1E30) to disable.
+    minVol 1e-13;
+
+    //- Minimum quality of the tet formed by the face-centre
+    //  and variable base point minimum decomposition triangles and
+    //  the cell centre. This has to be a positive number for tracking
+    //  to work. Set to very negative number (e.g. -1E30) to
+    //  disable.
+    //     <0 = inside out tet,
+    //      0 = flat tet
+    //      1 = regular tet
+    minTetQuality -1e30;
+
+    //- Minimum face area. Set to <0 to disable.
+    minArea -1;
+
+    //- Minimum face twist. Set to <-1 to disable. dot product of face normal
+    //  and face centre triangles normal
+    minTwist 1e-8;
+
+    //- Minimum normalised cell determinant
+    //  1 = hex, <= 0 = folded or flattened illegal cell
+    minDeterminant 0.001;
+
+    //- minFaceWeight (allowed values are from 0 to 0.5) typically 0.05
+    minFaceWeight 0.000005;
+
+    //- minVolRatio (0 -> 1)
+    minVolRatio 0.0001;
+
+    // must be >0 for Fluent compatibility (typically -1).
+    minTriangleTwist -1;
+
+    // Advanced
+
+    //- Number of error distribution iterations
+    nSmoothScale 4;
+
+    //- Amount to scale back displacement at error points
+    errorReduction 0.75;
+
+
+    // Optional : some meshing phases allow usage of relaxed rules.
+    // See e.g. addLayersControls::nRelaxedIter.
+    relaxed
+    {
+        //- Maximum non-orthogonality allowed. Set to 180 to disable.
+        maxNonOrtho 75;
+    }
+}
+
+// Merge tolerance. Is fraction of overall bounding box of initial mesh.
+// Note: the write tolerance needs to be higher than this.
+mergeTolerance 1e-6;

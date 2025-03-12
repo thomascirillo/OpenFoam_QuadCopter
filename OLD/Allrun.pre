@@ -1,0 +1,25 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+# - meshing
+runApplication surfaceFeatureExtract
+runApplication blockMesh
+# run parallel
+runApplication decomposePar
+runParallel snappyHexMesh 4 -overwrite
+runApplication reconstructParMesh -constant
+
+# - create the inlet/outlet and AMI patches
+runApplication createPatch -overwrite
+
+# renumber the mesh
+runApplication renumberMesh -overwrite
+
+
+
+# - set the initial fields
+restore0Dir
+
+#------------------------------------------------------------------------------
